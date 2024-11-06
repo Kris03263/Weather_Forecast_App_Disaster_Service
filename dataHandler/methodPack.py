@@ -2,9 +2,6 @@ from geopy.geocoders import Nominatim
 import geopy.geocoders,certifi,ssl,math
 import sqlite3
 import requests
-DATABASE = 'data.sqlite'
-conn = sqlite3.connect(DATABASE,check_same_thread=False)
-cursor = conn.cursor()
 ctx = ssl.create_default_context(cafile=certifi.where())
 geopy.geocoders.options.default_ssl_context = ctx
 
@@ -22,7 +19,7 @@ def setLocate(latitude,longitude):
     }
 
 def getStorageCity(userID):
-    url = f'http://127.0.0.1:6942/Users/GetStorageCity?ID={userID}'
+    url = f'http://host.docker.internal:8000/Users/GetStorageCity?ID={userID}'#這邊還需要更改
     response = requests.get(url,verify=False)
     if response.status_code == 200:
         return response.json()["data"]
