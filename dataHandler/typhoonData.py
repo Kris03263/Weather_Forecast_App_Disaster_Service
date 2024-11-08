@@ -44,14 +44,12 @@ def getTyphoonData():
             inittime += timedelta(hours=int(e["tau"]))
 
             del e["radiusOf70PercentProbability"],e["initTime"],e["tau"]
+            if "stateTransfers" in e :del e["stateTransfers"][1]
 
-            if "stateTransfers" in e :
-                del e["stateTransfers"][1]
+            e.setdefault("stateTransfers",{"value": None, "lang": None})
+            e.setdefault("circleOf15Ms",{ "radius": None })
+            e.setdefault("circleOf25Ms",{ "radius": None })
 
-            e.setdefault("stateTransfers",{ 
-                "value": None, "lang": None 
-            })
-            
             element["forecastData"]["fix"][i] = {**{"futureTime":str(inittime.strftime("%Y-%m-%d %H:%M:%S"))},**e}
                 
         resultData.append({
