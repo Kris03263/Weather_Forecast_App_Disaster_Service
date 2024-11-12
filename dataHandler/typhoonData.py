@@ -58,5 +58,3 @@ def getTyphoonData():
         })
         
     return resultData
-
-print(getTyphoonData())

@@ -1,14 +1,21 @@
 from flask import Blueprint, request, jsonify, make_response
 from dataHandler.earthQuakeData import getEarthData2, getEarthData
 import dataHandler.earthQuakeData
+import dataHandler.typhoonData as t
 from flask_socketio import emit
 from dataHandler.methodPack import getStorageCity
 import threading
 from flask_cors import CORS
+
+
+import dataHandler.typhoonData
 disasterControl_blueprint = Blueprint('disasterControl_blueprint', __name__)
 CORS(disasterControl_blueprint)
 background_tasks = {}
 
+@disasterControl_blueprint.route('/GetTyphoonData',methods=['GET'])
+def getTyphoonData():
+    return jsonify(t.getTyphoonData())
 
 @disasterControl_blueprint.route('/TestEarthQuakeSimulation', methods=['GET', 'POST'])
 def testEarthQuakeSimulation():
