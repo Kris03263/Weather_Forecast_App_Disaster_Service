@@ -38,12 +38,18 @@ def getTyphoonData():
                     ]
                 }
             })
+            e["fixTime"] = (datetime.fromisoformat(e["fixTime"])).strftime("%Y-%m-%d %H:%M:%S")
         for i,e in enumerate(element["forecastData"]["fix"]):
-            del e["radiusOf70PercentProbability"]
             inittime = datetime.fromisoformat(e["initTime"])
             inittime += timedelta(hours=int(e["tau"]))
-            del e["initTime"]
-            del e["tau"]
+
+            del e["radiusOf70PercentProbability"],e["initTime"],e["tau"]
+            if "stateTransfers" in e :del e["stateTransfers"][1]
+
+            e.setdefault("stateTransfers",{"value": None, "lang": None})
+            e.setdefault("circleOf15Ms",{ "radius": None })
+            e.setdefault("circleOf25Ms",{ "radius": None })
+
             element["forecastData"]["fix"][i] = {**{"futureTime":str(inittime.strftime("%Y-%m-%d %H:%M:%S"))},**e}
                 
         resultData.append({
