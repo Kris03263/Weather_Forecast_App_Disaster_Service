@@ -9,13 +9,8 @@ def getTyphoonData():
     for element in typhoonData:
         for e in element["analysisData"]["fix"]:
             if e["movingPrediction"] :del e["movingPrediction"][1]
-            else: 
-                e["movingPrediction"].append(
-                    {
-                        "value": None,
-                        "lang": None
-                    }
-                )
+            else: e["movingPrediction"].append({"value": None,"lang": None})
+
             e.setdefault("circleOf15Ms", {
                 "radius": None,
                 "quadrantRadii": {
@@ -27,6 +22,7 @@ def getTyphoonData():
                     ]
                 }
             })
+            
             e.setdefault("circleOf25Ms", {
                 "radius": None,
                 "quadrantRadii": {
@@ -38,7 +34,9 @@ def getTyphoonData():
                     ]
                 }
             })
+
             e["fixTime"] = (datetime.fromisoformat(e["fixTime"])).strftime("%Y-%m-%d %H:%M:%S")
+
         for i,e in enumerate(element["forecastData"]["fix"]):
             inittime = datetime.fromisoformat(e["initTime"])
             inittime += timedelta(hours=int(e["tau"]))
