@@ -3,7 +3,7 @@ from flask_restful import Api
 from flask_cors import CORS
 from flask_socketio import SocketIO
 app = Flask(__name__)
-socketio = SocketIO(app,async_mode='gevent')
+socketio = SocketIO(app,async_mode='gevent',cors_allowed_origins="*")
 api = Api(app)
 CORS(app)
 @app.route('/')
