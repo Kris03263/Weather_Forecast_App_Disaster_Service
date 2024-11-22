@@ -57,7 +57,7 @@ def haversine(lat1, lon1, lat2, lon2):
 
 
 
-def generate_earthquake_image(data,sid,backgroundPath):
+def generate_earthquake_image(data,sid,image_path):
     rendered_html = render_template(
         'card.html',
         time=data.get("時間"),
@@ -66,6 +66,7 @@ def generate_earthquake_image(data,sid,backgroundPath):
         distance=data.get("距離"),
         location_intensity=data.get("所在地區震度"),
         description=data.get("地震資訊"),
+        image_path=image_path
     )
     output_dir = "assest/images"
     temp_dir = "assest/temp"
@@ -82,7 +83,7 @@ def generate_earthquake_image(data,sid,backgroundPath):
     hti.screenshot(
     html_file=html_file,  # 指向你的 HTML 文件
         save_as=screenshot_filename,                      # 僅文件名
-        size=(360, 340)                                   # 指定尺寸
+        size=(360, 750)                                   # 指定尺寸
     )
     screenshot_path = os.path.join(output_dir, screenshot_filename)
 
@@ -154,8 +155,7 @@ def OutPutEarthPicture(latitude,longitude,intensity):
 
     # 保留底圖透明度通道
     map_image[:, :, 3] = np.maximum(map_image[:, :, 3], earthquake_layer[:, :, 3])
-    
-
     output_path = f'/assest/earthQuakeBackground/earthquake_map_{nowTime}.png'
-    cv2.imwrite(output_path, map_image)
-    print(f"圖片已保存至：{output_path}")
+    if not os.path.exists(output_path):
+        cv2.imwrite(output_path, map_image)
+        print(f"圖片已保存至：{output_path}")
