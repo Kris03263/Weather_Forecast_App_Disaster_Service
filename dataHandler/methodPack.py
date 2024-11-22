@@ -87,7 +87,7 @@ def generate_earthquake_image(data,sid,image_path):
     )
     screenshot_path = os.path.join(output_dir, screenshot_filename)
 
-def OutPutEarthPicture(latitude,longitude,intensity):
+def OutPutEarthPicture(latitude,longitude,intensity,nowTime):
     def lat_lon_to_pixels(lat, lon, min_lat, max_lat, min_lon, max_lon, img_width, img_height):
         x = int((lon - min_lon) / (max_lon - min_lon) * img_width)
         y = int((1 - (lat - min_lat) / (max_lat - min_lat)) * img_height)  # Y 軸應反轉
@@ -109,7 +109,6 @@ def OutPutEarthPicture(latitude,longitude,intensity):
         lat = eq["latitude"]
         lon = eq["longitude"]
         tens = eq["intensity"]
-        nowTime = eq["time"]
         x, y = lat_lon_to_pixels(lat, lon, min_lat, max_lat, min_lon, max_lon, img_width, img_height)
         for i,t in enumerate(tens):
             alpha = (i+1)*28
@@ -127,7 +126,7 @@ def OutPutEarthPicture(latitude,longitude,intensity):
             # 在地震層上繪製半透明圓 (紅色，帶透明度)
             cv2.circle(earthquake_layer, (x, y), int(radius_pixel), (0, 0, 255, alpha), -1)  # 紅色，alpha 指透明度
         
-        return [earthquake_layer,nowTime]
+        return earthquake_layer
 
     map_image_path = 'assest/earthQuakeBackground/background.png'
     map_image = cv2.imread(map_image_path, cv2.IMREAD_UNCHANGED)  # 包括透明通道
@@ -139,11 +138,8 @@ def OutPutEarthPicture(latitude,longitude,intensity):
     earthQuakeData = {"latitude":latitude,"longitude":longitude,"intensity":intensity}
 
     # 繪製地震數據層
-    newEarthQuake = draw_earthquake_layer(earthQuakeData, img_height, img_width)
-    earthquake_layer = newEarthQuake[0]
-    nowTime = newEarthQuake[1]
+    earthquake_layer = draw_earthquake_layer(earthQuakeData, img_height, img_width)
     
-
     # 確保底圖有透明通道（RGBA）
     if map_image.shape[2] == 3:
         map_image = cv2.cvtColor(map_image, cv2.COLOR_BGR2BGRA)
