@@ -136,7 +136,7 @@ def OutPutEarthPicture(latitude,longitude,intensity):
 
     # 獲取底圖尺寸
     img_height, img_width = map_image.shape[:2]
-    earthQuakeData = {latitude,longitude,intensity}
+    earthQuakeData = {"latitude":latitude,"longitude":longitude,"intensity":intensity}
 
     # 繪製地震數據層
     newEarthQuake = draw_earthquake_layer(earthQuakeData, img_height, img_width)

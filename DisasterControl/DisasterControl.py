@@ -17,8 +17,55 @@ CORS(disasterControl_blueprint)
 background_tasks = {}
 
 @disasterControl_blueprint.route('/test',methods=['GET'])
-def test(sid):
-    gen
+def test():
+    sid = request.args.get('sid')
+    last_earthquake_data = {
+        "color": "綠色",
+        "content": "11/20-12:23嘉義縣義竹鄉發生規模4.6有感地震，最大震度嘉義縣義竹、嘉義縣太保市4級。",
+        "depth": "11.7",
+        "distance": "239.92",
+        "intensity": [
+            {
+                "AreaDesc": "最大震度1級地區",
+                "AreaIntensity": "1級",
+                "CountyName": "南投縣、臺東縣、臺中市、花蓮縣、苗栗縣"
+            },
+            {
+                "AreaDesc": "最大震度2級地區",
+                "AreaIntensity": "2級",
+                "CountyName": "嘉義市、高雄市、澎湖縣、彰化縣"
+            },
+            {
+                "AreaDesc": "最大震度3級地區",
+                "AreaIntensity": "3級",
+                "CountyName": "臺南市、雲林縣"
+            },
+            {
+                "AreaDesc": "最大震度4級地區",
+                "AreaIntensity": "4級",
+                "CountyName": "嘉義縣"
+            }
+        ],
+        "latitude": 23.35,
+        "location": "嘉義縣政府南南西方  13.9  公里 (位於嘉義縣義竹鄉)",
+        "longitude": 120.23,
+        "magnitude": "4.6",
+        "nowLocation": "臺北市",
+        "nowLocationIntensity": "該地區未列入最大震度範圍",
+        "reportImg": "https://scweb.cwa.gov.tw/webdata/OLDEQ/202411/2024112012232246496_H.png",
+        "shakeImg": "https://scweb.cwa.gov.tw/webdata/drawTrace/plotContour/2024/2024496i.png",
+        "time": "2024-11-20 12:23:22"
+    }
+    result = {
+    "地震資訊": last_earthquake_data["content"],
+    "深度": last_earthquake_data["depth"],
+    "距離": last_earthquake_data["distance"],
+    "時間": last_earthquake_data["time"],
+    "規模": last_earthquake_data["magnitude"],
+    "所在地區震度": last_earthquake_data["nowLocationIntensity"],
+    }
+    OutPutEarthPicture(last_earthquake_data["latitude"],last_earthquake_data["longitude"],last_earthquake_data["intensity"])
+    generate_earthquake_image(result,sid,f'/assest/earthQuakeBackground/earthquake_map_{last_earthquake_data["time"]}.png')
     return send_file(f'./assest/images/earthquake_card_{sid}.png', mimetype='image/png')
 
 
@@ -112,7 +159,7 @@ def check_and_broadcast_updates_fake(socketio, sid, latitude, longitude, userID,
                 print("change data")
                 
                 last_earthquake_data = earthquake_data[len(earthquake_data)-1]
-                _earthQuakeBackgroundPath = f'/assest/earthQuakeBackground/earthquake_map_{last_earthquake_data['time']}.png'
+                _earthQuakeBackgroundPath = f'/assest/earthQuakeBackground/earthquake_map_{last_earthquake_data["time"]}.png'
                 #產圖
                 if not os.path.exists(_earthQuakeBackgroundPath):
                     OutPutEarthPicture(last_earthquake_data["latitude"],last_earthquake_data["longitude"],last_earthquake_data["intensity"])
