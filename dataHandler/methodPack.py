@@ -83,7 +83,7 @@ def generate_earthquake_image(data,sid,image_path):
     hti.screenshot(
     html_file=html_file,  # 指向你的 HTML 文件
         save_as=screenshot_filename,                      # 僅文件名
-        size=(360, 750)                                   # 指定尺寸
+        size=(360, 600)                                   # 指定尺寸
     )
     screenshot_path = os.path.join(output_dir, screenshot_filename)
 
