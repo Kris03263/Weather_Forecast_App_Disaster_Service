@@ -109,6 +109,7 @@ def check_and_broadcast_updates_fake(socketio, sid, latitude, longitude, userID,
             # 如果地震資料有變化，推送給該用戶
             if len(earthquake_data) > 0 and earthquake_data[len(earthquake_data)-1] != last_earthquake_data:
                 print("change data")
+                
                 last_earthquake_data = earthquake_data[len(earthquake_data)-1]
                 result = {
                     "地震資訊": last_earthquake_data["content"],
