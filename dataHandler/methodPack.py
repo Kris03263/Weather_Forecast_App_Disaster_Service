@@ -9,6 +9,7 @@ import requests
 import cv2
 import json
 import numpy as np
+import shutil
 ctx = ssl.create_default_context(cafile=certifi.where())
 geopy.geocoders.options.default_ssl_context = ctx
 
@@ -151,7 +152,8 @@ def OutPutEarthPicture(latitude,longitude,intensity,nowTime):
 
     # 保留底圖透明度通道
     map_image[:, :, 3] = np.maximum(map_image[:, :, 3], earthquake_layer[:, :, 3])
-    output_path = f'/assest/earthQuakeBackground/earthquake_map_{nowTime}.png'
-    if not os.path.exists(output_path):
+    output_path = f'earthquake_map_{nowTime}.png'
+    if not os.path.exists("assest/earthQuakeBackground/"+output_path):
         cv2.imwrite(output_path, map_image)
-        print(f"圖片已保存至：{output_path}")
+        shutil.move(output_path,"assest/earthQuakeBackground/")
+        print(f"圖片已保存至：{"assest/earthQuakeBackground/"+output_path}")
