@@ -18,6 +18,7 @@ background_tasks = {}
 
 @disasterControl_blueprint.route('/test',methods=['GET'])
 def test(sid):
+    gen
     return send_file(f'./assest/images/earthquake_card_{sid}.png', mimetype='image/png')
 
 
