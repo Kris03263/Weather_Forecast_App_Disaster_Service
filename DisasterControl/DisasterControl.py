@@ -114,7 +114,7 @@ def check_and_broadcast_updates_fake(socketio, sid, latitude, longitude, userID,
                 _earthQuakeBackgroundPath = f'/assest/earthQuakeBackground/earthquake_map_{last_earthquake_data['time']}.png'
                 #產圖
                 if not os.path.exists(_earthQuakeBackgroundPath):
-                    OutPutEarthPicture(latitude,longitude,last_earthquake_data["intensity"])
+                    OutPutEarthPicture(last_earthquake_data["latitude"],last_earthquake_data["longitude"],last_earthquake_data["intensity"])
                 result = {
                     "地震資訊": last_earthquake_data["content"],
                     "深度": last_earthquake_data["depth"],
