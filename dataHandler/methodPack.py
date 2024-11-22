@@ -1,6 +1,14 @@
 from geopy.geocoders import Nominatim
 import geopy.geocoders,certifi,ssl,math
-import sqlite3
+import time
+import os
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.chrome.options import Options
+from flask import render_template
+from PIL import Image
+from html2image import Html2Image
+from webdriver_manager.chrome import ChromeDriverManager
 import requests
 ctx = ssl.create_default_context(cafile=certifi.where())
 geopy.geocoders.options.default_ssl_context = ctx
@@ -47,3 +55,35 @@ def haversine(lat1, lon1, lat2, lon2):
     distance = R * c
 
     return f"{distance:.2f}"
+
+
+
+def generate_earthquake_image(data,sid):
+    rendered_html = render_template(
+        'card.html',
+        time=data.get("時間"),
+        magnitude=data.get("規模"),
+        depth=data.get("深度"),
+        distance=data.get("距離"),
+        location_intensity=data.get("所在地區震度"),
+        description=data.get("地震資訊"),
+    )
+    output_dir = "assest/images"
+    temp_dir = "assest/temp"
+    os.makedirs(temp_dir, exist_ok=True)
+    os.makedirs(output_dir, exist_ok=True)
+
+        # 保存 HTML 文件以供 Selenium 加載
+    html_file = "assest/temp/card.html"
+    with open(html_file, 'w', encoding='utf-8') as file:
+        file.write(rendered_html)
+    hti = Html2Image(output_path=output_dir)
+    screenshot_filename = f"earthquake_card_{sid}.png"
+# 將 HTML 保存為圖片
+    hti.screenshot(
+    html_file=html_file,  # 指向你的 HTML 文件
+        save_as=screenshot_filename,                      # 僅文件名
+        size=(360, 340)                                   # 指定尺寸
+    )
+    screenshot_path = os.path.join(output_dir, screenshot_filename)
+

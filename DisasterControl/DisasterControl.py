@@ -1,17 +1,25 @@
-from flask import Blueprint, request, jsonify, make_response
+from flask import Blueprint, request, jsonify, make_response,send_file,url_for
 from dataHandler.earthQuakeData import getEarthData2, getEarthData
 import dataHandler.earthQuakeData
 import dataHandler.typhoonData as t
 from flask_socketio import emit
-from dataHandler.methodPack import getStorageCity
+from dataHandler.methodPack import getStorageCity,generate_earthquake_image
 import threading
+from io import BytesIO
 from flask_cors import CORS
+import os
+from PIL import Image, ImageDraw, ImageFont
 
 
 import dataHandler.typhoonData
 disasterControl_blueprint = Blueprint('disasterControl_blueprint', __name__)
 CORS(disasterControl_blueprint)
 background_tasks = {}
+
+@disasterControl_blueprint.route('/test',methods=['GET'])
+def test(sid):
+    return send_file(f'./assest/images/earthquake_card_{sid}.png', mimetype='image/png')
+
 
 @disasterControl_blueprint.route('/GetTyphoonData',methods=['GET'])
 def getTyphoonData():
@@ -75,6 +83,9 @@ def check_and_broadcast_updates(socketio, sid, latitude, longitude, userID, stop
                     "所在地區震度": last_earthquake_data["nowLocationIntensity"],
                 }
                 if not stop_event.is_set():
+                    generate_earthquake_image(sid=sid,data=result)
+                    api_full_route = url_for('test', _external=True)
+                    result["社交連結url"] = api_full_route + '/' + sid
                     socketio.emit('earthquake_update', result, to=sid)
     except Exception as e:
         print(f"Error during message handling: {e}")

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Earthquake Info Cards</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            padding: 10px;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            align-items: center;
+            background-color: #f8f9fa;
+        }
+        .card {
+            width: 340px;
+            height: 280px;
+            padding: 20px;
+            border-radius: 15px;
+            color: white;
+            background: linear-gradient(270deg, #ff6a6a, #ff4a4a); /* 漸層背景 */
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+            position: relative;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card h1 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .card p {
+            margin: 8px 0;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .card .highlight {
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .card .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 20px;
+            height: 20px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            text-align: center;
+            line-height: 20px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.3);
+            transition: background-color 0.3s;
+        }
+        .card .close-btn:hover {
+            background-color: rgba(255, 255, 255, 0.6);
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="close-btn">×</div>
+        <h1>地震資訊</h1>
+        <p>時間：<span class="highlight">2024-10-14 21:19:16</span></p>
+        <p>規模：<span class="highlight">6.0</span></p>
+        <p>深度：20.5 公里</p>
+        <p>距離：98.08 公里</p>
+        <p>所在地區震度：3級</p>
+        <p>10/14-21:17臺灣東部海域發生規模5.0有感地震，最大震度花蓮縣太魯閣、宜蘭縣南澳4級。</p>
+    </div>
+    <!-- 可以多複製幾張卡片 -->
+</body>
+</html>
