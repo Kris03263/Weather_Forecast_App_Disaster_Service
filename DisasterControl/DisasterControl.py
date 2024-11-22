@@ -3,7 +3,7 @@ from dataHandler.earthQuakeData import getEarthData2, getEarthData
 import dataHandler.earthQuakeData
 import dataHandler.typhoonData as t
 from flask_socketio import emit
-from dataHandler.methodPack import getStorageCity,generate_earthquake_image
+from dataHandler.methodPack import getStorageCity,generate_earthquake_image,OutPutEarthPicture
 import threading
 from io import BytesIO
 from flask_cors import CORS
@@ -111,6 +111,10 @@ def check_and_broadcast_updates_fake(socketio, sid, latitude, longitude, userID,
                 print("change data")
                 
                 last_earthquake_data = earthquake_data[len(earthquake_data)-1]
+                _earthQuakeBackgroundPath = f'/assest/earthQuakeBackground/earthquake_map_{last_earthquake_data['time']}.png'
+                #產圖
+                if not os.path.exists(_earthQuakeBackgroundPath):
+                    OutPutEarthPicture(latitude,longitude,last_earthquake_data["intensity"])
                 result = {
                     "地震資訊": last_earthquake_data["content"],
                     "深度": last_earthquake_data["depth"],

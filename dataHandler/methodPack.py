@@ -2,14 +2,13 @@ from geopy.geocoders import Nominatim
 import geopy.geocoders,certifi,ssl,math
 import time
 import os
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service as ChromeService
-from selenium.webdriver.chrome.options import Options
 from flask import render_template
 from PIL import Image
 from html2image import Html2Image
-from webdriver_manager.chrome import ChromeDriverManager
 import requests
+import cv2
+import json
+import numpy as np
 ctx = ssl.create_default_context(cafile=certifi.where())
 geopy.geocoders.options.default_ssl_context = ctx
 
@@ -27,7 +26,7 @@ def setLocate(latitude,longitude):
     }
 
 def getStorageCity(userID):
-    url = f'http://host.docker.internal:8000/Users/GetStorageCity?ID={userID}'#這邊還需要更改
+    url = f'https://420269.xyz/Users/GetStorageCity?ID={userID}'#這邊還需要更改
     response = requests.get(url,verify=False)
     if response.status_code == 200:
         return response.json()["data"]
@@ -58,7 +57,7 @@ def haversine(lat1, lon1, lat2, lon2):
 
 
 
-def generate_earthquake_image(data,sid):
+def generate_earthquake_image(data,sid,backgroundPath):
     rendered_html = render_template(
         'card.html',
         time=data.get("時間"),
@@ -87,3 +86,76 @@ def generate_earthquake_image(data,sid):
     )
     screenshot_path = os.path.join(output_dir, screenshot_filename)
 
+def OutPutEarthPicture(latitude,longitude,intensity):
+    def lat_lon_to_pixels(lat, lon, min_lat, max_lat, min_lon, max_lon, img_width, img_height):
+        x = int((lon - min_lon) / (max_lon - min_lon) * img_width)
+        y = int((1 - (lat - min_lat) / (max_lat - min_lat)) * img_height)  # Y 軸應反轉
+        return x, y
+
+    def GetJsonData(path):
+        with open(path) as f:
+            iData = json.load(f)
+        return iData
+
+    # 繪製地震數據層
+    def draw_earthquake_layer(Data, img_height, img_width):
+        earthquake_layer = np.zeros((img_height, img_width, 4), dtype="uint8")  # RGBA 層
+        min_lat, max_lat = 21.0, 26.0  # 緯度範圍
+        min_lon, max_lon = 119.0, 123.0  # 經度範圍
+        cityAxisCode = GetJsonData('cityAxisCode.json')
+
+        eq = Data 
+        lat = eq["latitude"]
+        lon = eq["longitude"]
+        tens = eq["intensity"]
+        nowTime = eq["time"]
+        x, y = lat_lon_to_pixels(lat, lon, min_lat, max_lat, min_lon, max_lon, img_width, img_height)
+        for i,t in enumerate(tens):
+            alpha = (i+1)*28
+            county = t["CountyName"].split('、')
+            radius_pixel = 0
+            for c in county:
+                delta_lat = cityAxisCode[c]["lat"] - lat
+                delta_lon = cityAxisCode[c]["lon"] - lon
+
+                # 將經緯度距離轉換為像素距離
+                pixel_x_per_lon = img_width / (max_lon - min_lon)
+                pixel_y_per_lat = img_height / (max_lat - min_lat)
+                distance_pixel = ((delta_lon * pixel_x_per_lon)**2 + (delta_lat * pixel_y_per_lat)**2)**0.5
+                radius_pixel = max(radius_pixel, distance_pixel) 
+            # 在地震層上繪製半透明圓 (紅色，帶透明度)
+            cv2.circle(earthquake_layer, (x, y), int(radius_pixel), (0, 0, 255, alpha), -1)  # 紅色，alpha 指透明度
+        
+        return [earthquake_layer,nowTime]
+
+    map_image_path = 'assest/earthQuakeBackground/background.png'
+    map_image = cv2.imread(map_image_path, cv2.IMREAD_UNCHANGED)  # 包括透明通道
+    if map_image is None:
+        raise FileNotFoundError(f"底圖讀取失敗，請確認路徑是否正確：{map_image_path}")
+
+    # 獲取底圖尺寸
+    img_height, img_width = map_image.shape[:2]
+    earthQuakeData = {latitude,longitude,intensity}
+
+    # 繪製地震數據層
+    newEarthQuake = draw_earthquake_layer(earthQuakeData, img_height, img_width)
+    earthquake_layer = newEarthQuake[0]
+    nowTime = newEarthQuake[1]
+    
+
+    # 確保底圖有透明通道（RGBA）
+    if map_image.shape[2] == 3:
+        map_image = cv2.cvtColor(map_image, cv2.COLOR_BGR2BGRA)
+
+    # 半透明疊加：按 alpha 比例混合
+    alpha_layer = earthquake_layer[:, :, 3] / 255.0  # 透明度歸一化到 [0, 1]
+    for c in range(3):  # 混合 RGB 三個通道
+        map_image[:, :, c] = (1 - alpha_layer) * map_image[:, :, c] + alpha_layer * earthquake_layer[:, :, c]
+
+    # 保留底圖透明度通道
+    map_image[:, :, 3] = np.maximum(map_image[:, :, 3], earthquake_layer[:, :, 3])
+    
+
+    output_path = f'/assest/earthQuakeBackground/earthquake_map_{nowTime}.png'
+    cv2.imwrite(output_path, map_image)
+    print(f"圖片已保存至：{output_path}")
