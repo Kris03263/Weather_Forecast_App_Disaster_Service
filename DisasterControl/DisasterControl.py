@@ -1,14 +1,12 @@
-from flask import Blueprint, request, jsonify, make_response,send_file,url_for
+from flask import Blueprint, request, jsonify, make_response,send_file,url_for,current_app
 from dataHandler.earthQuakeData import getEarthData2, getEarthData
 import dataHandler.earthQuakeData
 import dataHandler.typhoonData as t
 from flask_socketio import emit
-from dataHandler.methodPack import getStorageCity,generate_earthquake_image,OutPutEarthPicture
+from dataHandler.methodPack import getStorageCity,OutPutEarthPicture
 import threading
-from io import BytesIO
 from flask_cors import CORS
 import os
-from PIL import Image, ImageDraw, ImageFont
 
 
 import dataHandler.typhoonData
@@ -16,57 +14,10 @@ disasterControl_blueprint = Blueprint('disasterControl_blueprint', __name__)
 CORS(disasterControl_blueprint)
 background_tasks = {}
 
-@disasterControl_blueprint.route('/test',methods=['GET'])
-def test():
-    sid = request.args.get('sid')
-    last_earthquake_data = {
-        "color": "綠色",
-        "content": "11/20-12:23嘉義縣義竹鄉發生規模4.6有感地震，最大震度嘉義縣義竹、嘉義縣太保市4級。",
-        "depth": "11.7",
-        "distance": "239.92",
-        "intensity": [
-            {
-                "AreaDesc": "最大震度1級地區",
-                "AreaIntensity": "1級",
-                "CountyName": "南投縣、臺東縣、臺中市、花蓮縣、苗栗縣"
-            },
-            {
-                "AreaDesc": "最大震度2級地區",
-                "AreaIntensity": "2級",
-                "CountyName": "嘉義市、高雄市、澎湖縣、彰化縣"
-            },
-            {
-                "AreaDesc": "最大震度3級地區",
-                "AreaIntensity": "3級",
-                "CountyName": "臺南市、雲林縣"
-            },
-            {
-                "AreaDesc": "最大震度4級地區",
-                "AreaIntensity": "4級",
-                "CountyName": "嘉義縣"
-            }
-        ],
-        "latitude": 23.35,
-        "location": "嘉義縣政府南南西方  13.9  公里 (位於嘉義縣義竹鄉)",
-        "longitude": 120.23,
-        "magnitude": "4.6",
-        "nowLocation": "臺北市",
-        "nowLocationIntensity": "該地區未列入最大震度範圍",
-        "reportImg": "https://scweb.cwa.gov.tw/webdata/OLDEQ/202411/2024112012232246496_H.png",
-        "shakeImg": "https://scweb.cwa.gov.tw/webdata/drawTrace/plotContour/2024/2024496i.png",
-        "time": "2024-11-20 12:23:22"
-    }
-    result = {
-    "地震資訊": last_earthquake_data["content"],
-    "深度": last_earthquake_data["depth"],
-    "距離": last_earthquake_data["distance"],
-    "時間": last_earthquake_data["time"],
-    "規模": last_earthquake_data["magnitude"],
-    "所在地區震度": last_earthquake_data["nowLocationIntensity"],
-    }
-    OutPutEarthPicture(last_earthquake_data["latitude"],last_earthquake_data["longitude"],last_earthquake_data["intensity"],last_earthquake_data["time"])
-    generate_earthquake_image(result,sid,f'../earthQuakeBackground/earthquake_map_{last_earthquake_data["time"]}.png')
-    return send_file(f'./assest/images/earthquake_card_{sid}.png', mimetype='image/png')
+@disasterControl_blueprint.route('/getImage',methods=['GET'])
+def getImage():
+    time = request.args.get('time')
+    return send_file(f'./assest/earthQuakeBackground/earthquake_map_{time}.png', mimetype='image/png')
 
 
 @disasterControl_blueprint.route('/GetTyphoonData',methods=['GET'])
@@ -102,7 +53,7 @@ def getEarthQuackData():
         longtitude, latitude, getStorageCity(userID)), 201)
     return response
 # 定義地震polling專用事件
-def check_and_broadcast_updates(socketio, sid, latitude, longitude, userID, stop_event):
+def check_and_broadcast_updates(socketio, sid, latitude, longitude, userID, stop_event,app):
     """
     每秒檢查 API 是否有新的地震資訊，並根據經緯度推送給相關客戶端。
     """
@@ -122,6 +73,11 @@ def check_and_broadcast_updates(socketio, sid, latitude, longitude, userID, stop
             if len(earthquake_data) > 0 and earthquake_data[0] != last_earthquake_data:
                 print("change data")
                 last_earthquake_data = earthquake_data[0]
+                time = str(last_earthquake_data["time"]).replace(" ","_")
+                _earthQuakeBackgroundPath = f'/assest/earthQuakeBackground/earthquake_map_{time}.png'
+                #產圖
+                if not os.path.exists(_earthQuakeBackgroundPath):
+                    OutPutEarthPicture(last_earthquake_data["latitude"],last_earthquake_data["longitude"],last_earthquake_data["intensity"],time)
                 result = {
                     "地震資訊": last_earthquake_data["content"],
                     "深度": last_earthquake_data["depth"],
@@ -131,14 +87,14 @@ def check_and_broadcast_updates(socketio, sid, latitude, longitude, userID, stop
                     "所在地區震度": last_earthquake_data["nowLocationIntensity"],
                 }
                 if not stop_event.is_set():
-                    generate_earthquake_image(sid=sid,data=result)
-                    api_full_route = url_for('test', _external=True)
-                    result["社交連結url"] = api_full_route + '/' + sid
-                    socketio.emit('earthquake_update', result, to=sid)
+                    with app.app_context():
+                        api_full_route = url_for('disasterControl_blueprint.getImage', _external=True)
+                        result["社交連結url"] = api_full_route + '?time=' + time
+                        socketio.emit('earthquake_update', result, to=sid)
     except Exception as e:
         print(f"Error during message handling: {e}")
 
-def check_and_broadcast_updates_fake(socketio, sid, latitude, longitude, userID, stop_event):
+def check_and_broadcast_updates_fake(socketio, sid, latitude, longitude, userID, stop_event,app):
     """
     每秒檢查 API 是否有新的地震資訊，並根據經緯度推送給相關客戶端。
     """
@@ -157,12 +113,12 @@ def check_and_broadcast_updates_fake(socketio, sid, latitude, longitude, userID,
             # 如果地震資料有變化，推送給該用戶
             if len(earthquake_data) > 0 and earthquake_data[len(earthquake_data)-1] != last_earthquake_data:
                 print("change data")
-                
                 last_earthquake_data = earthquake_data[len(earthquake_data)-1]
-                _earthQuakeBackgroundPath = f'/assest/earthQuakeBackground/earthquake_map_{last_earthquake_data["time"]}.png'
+                time = str(last_earthquake_data["time"]).replace(" ","_")
+                _earthQuakeBackgroundPath = f'/assest/earthQuakeBackground/earthquake_map_{time}.png'
                 #產圖
                 if not os.path.exists(_earthQuakeBackgroundPath):
-                    OutPutEarthPicture(last_earthquake_data["latitude"],last_earthquake_data["longitude"],last_earthquake_data["intensity"],last_earthquake_data["time"])
+                    OutPutEarthPicture(last_earthquake_data["latitude"],last_earthquake_data["longitude"],last_earthquake_data["intensity"],time)
                 result = {
                     "地震資訊": last_earthquake_data["content"],
                     "深度": last_earthquake_data["depth"],
@@ -171,13 +127,17 @@ def check_and_broadcast_updates_fake(socketio, sid, latitude, longitude, userID,
                     "規模": last_earthquake_data["magnitude"],
                     "所在地區震度": last_earthquake_data["nowLocationIntensity"],
                 }
+                print('hello')
                 if not stop_event.is_set():
-                    socketio.emit('earthquake_update_fake', result, to=sid)
+                    with app.app_context():
+                        api_full_route = url_for('disasterControl_blueprint.getImage', _external=True)
+                        result["社交連結url"] = api_full_route + '?time=' + time
+                        socketio.emit('earthquake_update_fake', result, to=sid)
     except Exception as e:
         print(f"Error during message handling: {e}")
 
 
-def register_socketio_events(socketio):
+def register_socketio_events(socketio,app):
     @socketio.on('connect')
     def handle_connect():
         print(f'Client {request.sid} connected')
@@ -200,7 +160,7 @@ def register_socketio_events(socketio):
                 # 綁定經緯度到客戶端的 socket id
                 print(f'Location set for {sid}: ({latitude}, {longitude})')
                 background_task = socketio.start_background_task(
-                    check_and_broadcast_updates_fake, socketio, sid, latitude, longitude, userID, stop_event)
+                    check_and_broadcast_updates_fake, socketio, sid, latitude, longitude, userID, stop_event,app)
                 background_tasks[event_sid] = stop_event
                 emit('registration_success', {
                      'message': 'Location registered successfully'}, to=sid)
@@ -227,7 +187,7 @@ def register_socketio_events(socketio):
                 # 綁定經緯度到客戶端的 socket id
                 print(f'Location set for {sid}: ({latitude}, {longitude})')
                 background_task = socketio.start_background_task(
-                    check_and_broadcast_updates, socketio, sid, latitude, longitude, userID, stop_event)
+                    check_and_broadcast_updates, socketio, sid, latitude, longitude, userID, stop_event,app)
                 background_tasks[event_sid] = stop_event
                 emit('registration_success', {
                      'message': 'Location registered successfully'}, to=sid)

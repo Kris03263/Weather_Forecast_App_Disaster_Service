@@ -56,39 +56,6 @@ def haversine(lat1, lon1, lat2, lon2):
 
     return f"{distance:.2f}"
 
-
-
-def generate_earthquake_image(data,sid,image_path):
-    print(image_path)
-    rendered_html = render_template(
-        'card.html',
-        time=data.get("時間"),
-        magnitude=data.get("規模"),
-        depth=data.get("深度"),
-        distance=data.get("距離"),
-        location_intensity=data.get("所在地區震度"),
-        description=data.get("地震資訊"),
-        image_path=image_path
-    )
-    output_dir = "assest/images"
-    temp_dir = "assest/temp"
-    os.makedirs(temp_dir, exist_ok=True)
-    os.makedirs(output_dir, exist_ok=True)
-
-        # 保存 HTML 文件以供 Selenium 加載
-    html_file = "assest/temp/card.html"
-    with open(html_file, 'w', encoding='utf-8') as file:
-        file.write(rendered_html)
-    hti = Html2Image(output_path=output_dir)
-    screenshot_filename = f"earthquake_card_{sid}.png"
-# 將 HTML 保存為圖片
-    hti.screenshot(
-    html_file=html_file,  # 指向你的 HTML 文件
-        save_as=screenshot_filename,                      # 僅文件名
-        size=(360, 600)                                   # 指定尺寸
-    )
-    screenshot_path = os.path.join(output_dir, screenshot_filename)
-
 def OutPutEarthPicture(latitude,longitude,intensity,nowTime):
     def lat_lon_to_pixels(lat, lon, min_lat, max_lat, min_lon, max_lon, img_width, img_height):
         x = int((lon - min_lon) / (max_lon - min_lon) * img_width)
