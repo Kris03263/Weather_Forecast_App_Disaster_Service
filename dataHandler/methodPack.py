@@ -125,8 +125,10 @@ def OutPutEarthPicture(latitude,longitude,intensity,nowTime):
                 pixel_y_per_lat = img_height / (max_lat - min_lat)
                 distance_pixel = ((delta_lon * pixel_x_per_lon)**2 + (delta_lat * pixel_y_per_lat)**2)**0.5
                 radius_pixel = max(radius_pixel, distance_pixel) 
-            # 在地震層上繪製半透明圓 (紅色，帶透明度)
-            cv2.circle(earthquake_layer, (x, y), int(radius_pixel), (0, 0, 255, alpha), -1)  # 紅色，alpha 指透明度
+
+            cv2.circle(earthquake_layer, (x, y), int(radius_pixel), (0, 0, 255, alpha), -1)
+        cv2.circle(earthquake_layer, (x, y), 15, (0, 0, 0, 255), -1)  
+        cv2.circle(earthquake_layer, (x, y), 5, (255, 255, 255, 255), -1)  
         
         return earthquake_layer
 
