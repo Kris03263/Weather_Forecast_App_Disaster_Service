@@ -65,7 +65,7 @@ def test():
     "所在地區震度": last_earthquake_data["nowLocationIntensity"],
     }
     OutPutEarthPicture(last_earthquake_data["latitude"],last_earthquake_data["longitude"],last_earthquake_data["intensity"],last_earthquake_data["time"])
-    generate_earthquake_image(result,sid,f'/assest/earthQuakeBackground/earthquake_map_{last_earthquake_data["time"]}.png')
+    generate_earthquake_image(result,sid,f'../earthQuakeBackground/earthquake_map_{last_earthquake_data["time"]}.png')
     return send_file(f'./assest/images/earthquake_card_{sid}.png', mimetype='image/png')
 
 

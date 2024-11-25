@@ -59,6 +59,7 @@ def haversine(lat1, lon1, lat2, lon2):
 
 
 def generate_earthquake_image(data,sid,image_path):
+    print(image_path)
     rendered_html = render_template(
         'card.html',
         time=data.get("時間"),
@@ -156,4 +157,4 @@ def OutPutEarthPicture(latitude,longitude,intensity,nowTime):
     if not os.path.exists("assest/earthQuakeBackground/"+output_path):
         cv2.imwrite(output_path, map_image)
         shutil.move(output_path,"assest/earthQuakeBackground/")
-        print(f"圖片已保存至：{"assest/earthQuakeBackground/"+output_path}")
+        print(f"圖片已保存至：{'assest/earthQuakeBackground/'+output_path}")
