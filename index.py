@@ -6,7 +6,7 @@ app = Flask(__name__)
 socketio = SocketIO(app,async_mode='gevent',cors_allowed_origins="*")
 api = Api(app)
 CORS(app)
-app.config['SERVER_NAME'] = '0.0.0.0:8080'
+app.config['SERVER_NAME'] = '420269.xyz'
 @app.route('/')
 def index():
     return 'hello there2'
