@@ -53,7 +53,7 @@ def getEarthQuackData():
         longtitude, latitude, getStorageCity(userID)), 201)
     return response
 # 定義地震polling專用事件
-def check_and_broadcast_updates(socketio, sid, latitude, longitude, userID, stop_event,app):
+def check_and_broadcast_updates(socketio, sid, latitude, longitude, userID, stop_event):
     """
     每秒檢查 API 是否有新的地震資訊，並根據經緯度推送給相關客戶端。
     """
@@ -87,14 +87,12 @@ def check_and_broadcast_updates(socketio, sid, latitude, longitude, userID, stop
                     "所在地區震度": last_earthquake_data["nowLocationIntensity"],
                 }
                 if not stop_event.is_set():
-                    with app.app_context():
-                        api_full_route = url_for('disasterControl_blueprint.getImage', _external=True)
-                        result["社交連結url"] = api_full_route + '?time=' + time
-                        socketio.emit('earthquake_update', result, to=sid)
+                    result["社交連結url"] = 'https://420269.xyz/Disaster/getImage?time=' + time
+                    socketio.emit('earthquake_update_fake', result, to=sid)
     except Exception as e:
         print(f"Error during message handling: {e}")
 
-def check_and_broadcast_updates_fake(socketio, sid, latitude, longitude, userID, stop_event,app):
+def check_and_broadcast_updates_fake(socketio, sid, latitude, longitude, userID, stop_event):
     """
     每秒檢查 API 是否有新的地震資訊，並根據經緯度推送給相關客戶端。
     """
@@ -129,10 +127,8 @@ def check_and_broadcast_updates_fake(socketio, sid, latitude, longitude, userID,
                 }
                 print('hello')
                 if not stop_event.is_set():
-                    with app.app_context():
-                        api_full_route = url_for('disasterControl_blueprint.getImage', _external=True)
-                        result["社交連結url"] = api_full_route + '?time=' + time
-                        socketio.emit('earthquake_update_fake', result, to=sid)
+                    result["社交連結url"] = 'https://420269.xyz/Disaster/getImage?time=' + time
+                    socketio.emit('earthquake_update_fake', result, to=sid)
     except Exception as e:
         print(f"Error during message handling: {e}")
 
@@ -160,7 +156,7 @@ def register_socketio_events(socketio,app):
                 # 綁定經緯度到客戶端的 socket id
                 print(f'Location set for {sid}: ({latitude}, {longitude})')
                 background_task = socketio.start_background_task(
-                    check_and_broadcast_updates_fake, socketio, sid, latitude, longitude, userID, stop_event,app)
+                    check_and_broadcast_updates_fake, socketio, sid, latitude, longitude, userID, stop_event)
                 background_tasks[event_sid] = stop_event
                 emit('registration_success', {
                      'message': 'Location registered successfully'}, to=sid)
@@ -187,7 +183,7 @@ def register_socketio_events(socketio,app):
                 # 綁定經緯度到客戶端的 socket id
                 print(f'Location set for {sid}: ({latitude}, {longitude})')
                 background_task = socketio.start_background_task(
-                    check_and_broadcast_updates, socketio, sid, latitude, longitude, userID, stop_event,app)
+                    check_and_broadcast_updates, socketio, sid, latitude, longitude, userID, stop_event)
                 background_tasks[event_sid] = stop_event
                 emit('registration_success', {
                      'message': 'Location registered successfully'}, to=sid)
