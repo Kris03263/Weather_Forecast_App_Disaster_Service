@@ -27,7 +27,7 @@ def setLocate(latitude,longitude):
     }
 
 def getStorageCity(userID):
-    url = f'https://420269.xyz/Users/GetStorageCity?ID={userID}'#這邊還需要更改
+    url = f'http://420269.xyz/Users/GetStorageCity?ID={userID}'#這邊還需要更改
     response = requests.get(url,verify=False)
     if response.status_code == 200:
         return response.json()["data"]

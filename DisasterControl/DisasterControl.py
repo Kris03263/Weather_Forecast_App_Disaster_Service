@@ -17,7 +17,7 @@ background_tasks = {}
 @disasterControl_blueprint.route('/getImage',methods=['GET'])
 def getImage():
     time = request.args.get('time')
-    return send_file(f'./assest/earthQuakeBackground/earthquake_map_{time}.png', mimetype='image/png')
+    return send_file(f'assest/earthQuakeBackground/earthquake_map_{time}.png', mimetype='image/png')
 
 
 @disasterControl_blueprint.route('/GetTyphoonData',methods=['GET'])
