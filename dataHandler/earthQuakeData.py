@@ -46,12 +46,12 @@ def getEarthData(lon,lat,city):
     earthquakeData = requests.get(url,verify=False).json()["records"]["Earthquake"]
     resultData = []
     _city = city
-    for i in range(len(earthquakeData)):
-        shakeLon = earthquakeData[i]["EarthquakeInfo"]["Epicenter"]["EpicenterLongitude"]
-        shakeLat = earthquakeData[i]["EarthquakeInfo"]["Epicenter"]["EpicenterLatitude"]
+    for e in earthquakeData:
+        shakeLon = e["EarthquakeInfo"]["Epicenter"]["EpicenterLongitude"]
+        shakeLat = e["EarthquakeInfo"]["Epicenter"]["EpicenterLatitude"]
         intensity = []
         AreaIntensity = ""
-        shakeArea = earthquakeData[i]["Intensity"]["ShakingArea"]
+        shakeArea = e["Intensity"]["ShakingArea"]
         for nowElement in shakeArea:
             if not -nowElement["AreaDesc"].find("最"):
                 del nowElement["EqStation"]
@@ -63,15 +63,15 @@ def getEarthData(lon,lat,city):
             intensity = sorted(intensity, key=lambda x: int(x['AreaIntensity'][0]))
 
         resultData.append({
-            "color":                earthquakeData[i]["ReportColor"],
-            "content":              earthquakeData[i]["ReportContent"],
+            "color":                e["ReportColor"],
+            "content":              e["ReportContent"],
             "nowLocation":          _city,
-            "reportImg":            earthquakeData[i]["ReportImageURI"],
-            "shakeImg":             earthquakeData[i]["ShakemapImageURI"],
-            "time":                 earthquakeData[i]["EarthquakeInfo"]["OriginTime"],
-            "depth":                str(earthquakeData[i]["EarthquakeInfo"]["FocalDepth"]),
-            "location":             earthquakeData[i]["EarthquakeInfo"]["Epicenter"]["Location"],
-            "magnitude":            str(earthquakeData[i]["EarthquakeInfo"]["EarthquakeMagnitude"]["MagnitudeValue"]),
+            "reportImg":            e["ReportImageURI"],
+            "shakeImg":             e["ShakemapImageURI"],
+            "time":                 e["EarthquakeInfo"]["OriginTime"],
+            "depth":                str(e["EarthquakeInfo"]["FocalDepth"]),
+            "location":             e["EarthquakeInfo"]["Epicenter"]["Location"],
+            "magnitude":            str(e["EarthquakeInfo"]["EarthquakeMagnitude"]["MagnitudeValue"]),
             "distance":             haversine(lat,lon,shakeLat,shakeLon),
             "intensity":            intensity,
             "nowLocationIntensity": AreaIntensity if AreaIntensity else "該地區未列入最大震度範圍",

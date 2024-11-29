@@ -94,7 +94,7 @@ def OutPutEarthPicture(latitude,longitude,intensity,nowTime):
                 radius_pixel = max(radius_pixel, distance_pixel) 
 
             cv2.circle(earthquake_layer, (x, y), int(radius_pixel), (0, 0, 255, alpha), -1)
-        cv2.circle(earthquake_layer, (x, y), 15, (0, 0, 0, 255), -1)  
+        cv2.circle(earthquake_layer, (x, y), 9, (0, 0, 0, 255), -1)  
         cv2.circle(earthquake_layer, (x, y), 5, (255, 255, 255, 255), -1)  
         
         return earthquake_layer
