@@ -1,4 +1,4 @@
-import requests
+import requests,json
 from datetime import datetime,timedelta
 
 url = "https://opendata.cwa.gov.tw/api/v1/rest/datastore/W-C0034-005?Authorization=CWA-3D385D45-EFD5-4BD3-9677-9100AD39A4A2"
@@ -6,6 +6,8 @@ url = "https://opendata.cwa.gov.tw/api/v1/rest/datastore/W-C0034-005?Authorizati
 def getTyphoonData():
     typhoonData = requests.get(url).json()["records"]["tropicalCyclones"]["tropicalCyclone"]
     resultData = []
+    direction = None
+    with open('direction.json') as f:direction = json.load(f)
     for element in typhoonData:
         for e in element["analysisData"]["fix"]:
             if e["movingPrediction"] :del e["movingPrediction"][1]
@@ -48,7 +50,7 @@ def getTyphoonData():
             e.setdefault("circleOf15Ms",{ "radius": None })
             e.setdefault("circleOf25Ms",{ "radius": None })
 
-            element["forecastData"]["fix"][i] = {**{"futureTime":str(inittime.strftime("%Y-%m-%d %H:%M:%S"))},**e}
+            element["forecastData"]["fix"][i] = {**{"futureTime":str(inittime.strftime("%Y-%m-%d %H:%M:%S"))},**e,**{"chineseDirection":direction[e["movingDirection"]]}}
                 
         resultData.append({
             "name":element["typhoonName"],
