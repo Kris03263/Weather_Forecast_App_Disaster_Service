@@ -62,7 +62,7 @@ def check_and_broadcast_updates(socketio, sid, latitude, longitude, userID, stop
         last_earthquake_data = None
         print('I get into background')
         while not stop_event.is_set():
-            socketio.sleep(1)  # 每秒輪詢一次
+            socketio.sleep(0.5)  # 每秒輪詢一次
             # 獲取每個客戶端對應經緯度的最新地震資料
             earthquake_data = getEarthData(
                 float(longitude), float(latitude), getStorageCity(userID))
@@ -101,7 +101,7 @@ def check_and_broadcast_updates_fake(socketio, sid, latitude, longitude, userID,
         last_earthquake_data = None
         print('I get into background')
         while not stop_event.is_set():
-            socketio.sleep(1)  # 每秒輪詢一次
+            socketio.sleep(0.5)  # 每秒輪詢一次
             # 獲取每個客戶端對應經緯度的最新地震資料
             earthquake_data = getEarthData2(
                 float(longitude), float(latitude), getStorageCity(userID))
