@@ -182,8 +182,8 @@ def register_socketio_events(socketio,app):
             if event_sid not in background_tasks and latitude is not None and longitude is not None:
                 # 綁定經緯度到客戶端的 socket id
                 print(f'Location set for {sid}: ({latitude}, {longitude})')
-                background_task = socketio.start_background_task(
-                    check_and_broadcast_updates, socketio, sid, latitude, longitude, userID, stop_event)
+                '''background_task = socketio.start_background_task(
+                    check_and_broadcast_updates, socketio, sid, latitude, longitude, userID, stop_event)'''
                 background_tasks[event_sid] = stop_event
                 emit('registration_success', {
                      'message': 'Location registered successfully'}, to=sid)
