@@ -1,7 +1,7 @@
 import requests
 from .methodPack import haversine,setLocate
 
-url = "https://opendata.cwa.gov.tw/api/v1/rest/datastore/E-A0015-001?Authorization=CWA-3D385D45-EFD5-4BD3-9677-9100AD39A4A2&limit=10"
+url = "https://opendata.cwa.gov.tw/api/v1/rest/datastore/E-A0015-001?Authorization=CWA-3BEF89AA-6B46-445D-999F-DB043639E781&limit=10"
 testData = [{
         "color": "綠色",
         "content": "11/20-12:23嘉義縣義竹鄉發生規模4.6有感地震，最大震度嘉義縣義竹、嘉義縣太保市4級。",

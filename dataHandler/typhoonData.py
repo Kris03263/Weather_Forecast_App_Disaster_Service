@@ -1,7 +1,7 @@
 import requests,json
 from datetime import datetime,timedelta
 
-url = "https://opendata.cwa.gov.tw/api/v1/rest/datastore/W-C0034-005?Authorization=CWA-3D385D45-EFD5-4BD3-9677-9100AD39A4A2"
+url = "https://opendata.cwa.gov.tw/api/v1/rest/datastore/W-C0034-005?Authorization=CWA-3BEF89AA-6B46-445D-999F-DB043639E781"
 
 def getTyphoonData():
     typhoonData = requests.get(url).json()["records"]["tropicalCyclones"]["tropicalCyclone"]
